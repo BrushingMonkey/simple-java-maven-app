@@ -23,24 +23,19 @@ jobs:
 
     - name: Increment patch version
       run: |
-        # Get current version from pom.xml
         current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout || echo "1.0.0")
         echo "Current version: $current_version"
-        
-        # Use 1.0.0 if no version is set
+
         if [[ -z "$current_version" || "$current_version" == *"-SNAPSHOT" ]]; then
           current_version="1.0.0"
         fi
 
-        # Extract base version and patch number
         base_version=${current_version%.*}
         patch_version=${current_version##*.}
 
-        # Increment patch version
         new_patch_version=$((patch_version + 1))
         new_version="$base_version.$new_patch_version"
 
-        # Update the pom.xml with the new version
         mvn versions:set -DnewVersion=$new_version -q
         mvn versions:commit -q
 
@@ -58,3 +53,6 @@ jobs:
 
     - name: Build with Maven
       run: mvn clean package
+
+    - name: List contents of target directory
+      run: ls -l /home/runner/work/simple-java-maven-app/simple-java-maven-app/target
