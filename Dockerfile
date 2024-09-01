@@ -14,5 +14,5 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar /app/
-
+# sh to execute command, -c to tell sh to execute the java command in string
 CMD ["sh", "-c", "java -jar /app/*.jar"]
