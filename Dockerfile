@@ -6,6 +6,7 @@ COPY pom.xml .
 RUN mvn dependency:go-offline
 
 COPY src ./src
+RUN ls -l /app/
 
 # Stage 3 Final
 FROM openjdk:17-jdk-slim
