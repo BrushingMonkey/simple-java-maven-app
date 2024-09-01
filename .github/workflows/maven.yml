@@ -1,35 +1,60 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Java CI with Maven
+name: Java CI with Automatic Version Increment
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    #- name: Update dependency graph
-    #  uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
+    - name: Increment patch version
+      run: |
+        # Get current version from pom.xml
+        current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout || echo "1.0.0")
+        echo "Current version: $current_version"
+        
+        # Use 1.0.0 if no version is set
+        if [[ -z "$current_version" || "$current_version" == *"-SNAPSHOT" ]]; then
+          current_version="1.0.0"
+        fi
+
+        # Extract base version and patch number
+        base_version=${current_version%.*}
+        patch_version=${current_version##*.}
+
+        # Increment patch version
+        new_patch_version=$((patch_version + 1))
+        new_version="$base_version.$new_patch_version"
+
+        # Update the pom.xml with the new version
+        mvn versions:set -DnewVersion=$new_version -q
+        mvn versions:commit -q
+
+        echo "New version set to: $new_version"
+
+    - name: Commit version increment
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add pom.xml
+        git commit -m "Increment version to $new_version"
+        git push
+
+    - name: Build with Maven
+      run: mvn clean package
