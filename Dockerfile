@@ -7,12 +7,12 @@ RUN mvn dependency:go-offline
 
 COPY src ./src
 RUN mvn clean package
-RUN ls -l /app/
+RUN ls -l /app/target/
 
 # Stage 3 Final
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar /app/
+COPY --from=build /app/target/*.jar /app/target/
 
-CMD ["java", "-jar", "app/*.jar"]
+CMD ["java", "-jar", "/app/target/*.jar"]
