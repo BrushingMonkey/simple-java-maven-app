@@ -21,25 +21,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Increment patch version
-      run: |
-        current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout || echo "1.0.0")
-        echo "Current version: $current_version"
-
-        if [[ -z "$current_version" || "$current_version" == *"-SNAPSHOT" ]]; then
-          current_version="1.0.0"
-        fi
-
-        base_version=${current_version%.*}
-        patch_version=${current_version##*.}
-
-        new_patch_version=$((patch_version + 1))
-        new_version="$base_version.$new_patch_version"
-
-        mvn versions:set -DnewVersion=$new_version -q
-        mvn versions:commit -q
-
-        echo "New version set to: $new_version"
+    - name: Auto-increment the version number
+      id: version
+      uses: Kaven-Universe/github-action-auto-increment-version@v1
+      with:
+        file: "pom.xml"
 
     - name: Commit version increment
       env:
@@ -48,7 +34,7 @@ jobs:
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
         git add pom.xml
-        git commit -m "Increment version to $new_version"
+        git commit -m "Increment version from ${{ steps.version.outputs.oldVersion }} to ${{ steps.version.outputs.newVersion }}"
         git push
 
     - name: Build with Maven
