@@ -13,6 +13,6 @@ RUN ls -l /app/target/
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar /app/target/
+COPY --from=build /app/target/*.jar /app/
 
-CMD ["java", "-jar", "/app/target/*.jar"]
+CMD ["sh", "-c", "java -jar /app/*.jar"]
