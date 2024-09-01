@@ -55,4 +55,4 @@ jobs:
       run: mvn clean package
 
     - name: List contents of target directory
-      run: ls -l /home/runner/work/simple-java-maven-app/simple-java-maven-app/target
+      run: ls -l /home/runner/work/simple-java-maven-app/simple-java-maven-app/
