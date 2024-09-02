@@ -20,7 +20,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-
+    #dsfdf
     - name: Increment patch version
       run: |
         current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout || echo "1.0.0")
