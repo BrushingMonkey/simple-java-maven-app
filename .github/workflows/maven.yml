@@ -57,7 +57,7 @@ jobs:
     - name: Build Docker Image
       run: |
         echo "Building Docker image..."
-        docker build . -f Dockerfile -t rebachi/githuub-actions:latest
+        docker build . -f Dockerfile -t rebachi/github-actions:latest
 
     - name: Login to Docker Hub
       env:
@@ -67,4 +67,22 @@ jobs:
         echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
 
     - name: Push Docker Image
-      run: docker push rebachi/githuub-actions:latest
+      run: docker push rebachi/github-actions:latest
+
+    - name: Deploy to EC2 using SSM
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: eu-north-1
+      run: |
+        aws ssm send-command \
+          --instance-ids "i-0a44d89583d44733c" \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}",
+            "docker pull rebachi/github-actions:latest",
+            "docker stop myapp || true",
+            "docker rm myapp || true",
+            "docker run -d --name myapp -p 80:80 rebachi/github-actions:latest"
+          ]' \
+          --region $AWS_REGION
