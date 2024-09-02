@@ -49,7 +49,7 @@ resource "aws_instance" "web" {
 resource "aws_default_vpc" "default" {}
 
 resource "aws_security_group" "SG" {
-  name        = "Grafana"
+  name        = "github-actions"
   description = "Allow web inbound traffic"
   vpc_id = aws_default_vpc.default.id
 
