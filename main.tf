@@ -12,6 +12,12 @@ provider "aws" {
   region = "eu-north-1"
 }
 
+variable "allow_ports" {
+  description = "ports to open"
+  type        = list(any)
+  default     = ["22", "80"]
+}
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
