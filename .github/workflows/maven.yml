@@ -20,7 +20,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    #dsfdf
+
     - name: Increment patch version
       run: |
         current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout || echo "1.0.0")
@@ -75,9 +75,9 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
       with:
-        aws-access-key-id: ${{ secrets.AWS_KEY}}
+        aws-access-key-id: ${{ secrets.AWS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-        AWS_REGION: eu-north-1
+        aws-region: eu-north-1
 
     - name: Initialize Terraform
       run: terraform init && terraform apply --auto-approve
